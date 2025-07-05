@@ -28,42 +28,41 @@ const sampleBusinessNames = [
 
 let cachedBusinesses = []
 
-// ✅ 1. GET /business-data → Returns 25 random business cards
+// ✅ GET /business-data → Returns 25 random business cards
 app.get('/business-data', (req, res) => {
   const businesses = []
 
   for (let i = 0; i < 25; i++) {
     const name = sampleBusinessNames[Math.floor(Math.random() * sampleBusinessNames.length)]
     const location = sampleLocations[Math.floor(Math.random() * sampleLocations.length)]
-    const rating = (4 + Math.random()).toFixed(1)
+    const rating = (2 + Math.random() * 3).toFixed(1) // 2.0 to 5.0
     const reviews = Math.floor(50 + Math.random() * 200)
     const headline = `${sampleHeadlines[Math.floor(Math.random() * sampleHeadlines.length)]} ${location}`
 
-    businesses.push({
-      id: `${i + 1}`,
-      name,
-      location,
-      rating,
-      reviews,
-      headline
-    })
+    businesses.push({ id: `${i + 1}`, name, location, rating, reviews, headline })
   }
 
   cachedBusinesses = businesses
   res.json(businesses)
 })
 
-// ✅ 2. GET /regenerate-headline/:id → Regenerates only headline for specific ID
+// ✅ GET /regenerate-headline/:id → Regenerates all fields for specific ID
 app.get('/regenerate-headline/:id', (req, res) => {
   const { id } = req.params
   const index = cachedBusinesses.findIndex(b => b.id === id)
-  if (index === -1) {
-    return res.status(404).json({ error: 'Business not found' })
-  }
-  const location = cachedBusinesses[index].location
+  if (index === -1) return res.status(404).json({ error: 'Business not found' })
+
+  const name = sampleBusinessNames[Math.floor(Math.random() * sampleBusinessNames.length)]
+  const location = sampleLocations[Math.floor(Math.random() * sampleLocations.length)]
+  const rating = (2 + Math.random() * 3).toFixed(1)
+  const reviews = Math.floor(50 + Math.random() * 200)
   const headline = `${sampleHeadlines[Math.floor(Math.random() * sampleHeadlines.length)]} ${location}`
-  cachedBusinesses[index].headline = headline
-  res.json({ id, headline })
+
+  const updated = { id, name, location, rating, reviews, headline }
+  cachedBusinesses[index] = updated
+  res.json(updated)
 })
 
-app.listen(3000, () => console.log('🔥 Backend running on http://localhost:3000'))
+// ✅ Use dynamic port for Render deployment
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log(`🔥 Backend running on port ${PORT}`))
